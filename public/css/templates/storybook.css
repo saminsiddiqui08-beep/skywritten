@@ -1,0 +1,925 @@
+.storybook-stage {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: calc(var(--spacing-unit) * 2.5);
+    padding: calc(var(--spacing-unit) * 2);
+    opacity: 0;
+    transition: opacity 0.6s ease-out;
+}
+
+.storybook-stage.stage-ready {
+    opacity: 1;
+}
+
+.storybook-viewport {
+    width: 100%;
+    max-width: 400px;
+    height: 74vh;
+    height: 74dvh;
+    max-height: 660px;
+    /* Setting the vanishing point off to the left so a turning leaf sweeps toward the reader rather than folding flat against the screen */
+    perspective: 1800px;
+    perspective-origin: 20% center;
+    position: relative;
+    transform-style: preserve-3d;
+}
+
+/* Painting the spine shadow as a pseudo-element, which keeps it out of the transform that carries the leaf */
+.storybook-viewport::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: 4px;
+    bottom: 4px;
+    width: 5px;
+    background: linear-gradient(to right,
+            rgba(244, 244, 245, 0.06),
+            rgba(244, 244, 245, 0.015));
+    border-radius: 3px 0 0 3px;
+    z-index: 30;
+    pointer-events: none;
+}
+
+.storybook-viewport::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    right: -3px;
+    bottom: 5px;
+    width: 4px;
+    z-index: 0;
+    pointer-events: none;
+    border-right: 1px solid rgba(244, 244, 245, 0.025);
+    border-left: 1px solid rgba(244, 244, 245, 0.015);
+    border-radius: 0 1px 1px 0;
+}
+
+/* Turning each leaf about its spine in three dimensions, which is the whole identity of this template and the reason page changes are never a fade */
+.storybook-leaf {
+    position: absolute;
+    inset: 0;
+    transform-origin: left center;
+    transform-style: preserve-3d;
+    transform: rotateY(0deg);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 1px 5px 5px 1px;
+    background: linear-gradient(to right,
+            rgb(6, 6, 9) 0%,
+            rgb(10, 10, 14) 5%,
+            rgb(12, 12, 16) 100%);
+    border: 1px solid rgba(244, 244, 245, 0.10);
+    border-left: none;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
+    transition: transform 0.7s cubic-bezier(0.4, 0.0, 0.2, 1);
+    /* Promoting only the leaf, because promoting every page at once exhausts texture memory on the devices this has to run on */
+    will-change: transform;
+    pointer-events: none;
+}
+
+.storybook-leaf.leaf-current {
+    pointer-events: auto;
+    transform: rotateY(0deg) translateZ(1px);
+}
+
+.storybook-leaf.leaf-turned {
+    transform: rotateY(-180deg) translateZ(1px);
+}
+
+#sb-leaf-cover {
+    background: linear-gradient(to right,
+            rgba(6, 6, 9, 0.8) 0%,
+            rgba(10, 10, 14, 0.78) 5%,
+            rgba(12, 12, 16, 0.75) 100%);
+}
+
+.storybook-leaf::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 24px;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.18), transparent);
+    pointer-events: none;
+    z-index: 10;
+    border-radius: 1px 0 0 1px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.storybook-leaf::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(135deg,
+            transparent 50%,
+            rgba(244, 244, 245, 0.025) 50%,
+            rgba(244, 244, 245, 0.05) 100%);
+    border-radius: 0 0 4px 0;
+    pointer-events: none;
+    z-index: 5;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Pre-rotating the reverse face so a turned leaf presents its back rather than a mirrored copy of its front */
+.leaf-back {
+    position: absolute;
+    inset: 0;
+    transform: rotateY(180deg);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    background: linear-gradient(to left,
+            rgb(7, 7, 10) 0%,
+            rgb(10, 10, 13) 5%,
+            rgb(13, 13, 17) 100%);
+    border-radius: 5px 1px 1px 5px;
+    border: 1px solid rgba(244, 244, 245, 0.04);
+    border-right: none;
+    pointer-events: none;
+}
+
+.leaf-back::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 24px;
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.15), transparent);
+    pointer-events: none;
+    border-radius: 0 1px 1px 0;
+}
+
+/* Holding the readable face upright inside the rotating leaf, so text never mirrors during a turn */
+.leaf-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: calc(var(--spacing-unit) * 3) calc(var(--spacing-unit) * 2.5) calc(var(--spacing-unit) * 3) calc(var(--spacing-unit) * 3.5);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(244, 244, 245, 0.22) rgba(244, 244, 245, 0.05);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.leaf-inner::-webkit-scrollbar {
+    width: 6px;
+}
+
+.leaf-inner::-webkit-scrollbar-track {
+    background: rgba(244, 244, 245, 0.05);
+    border-radius: 3px;
+}
+
+.leaf-inner::-webkit-scrollbar-thumb {
+    background: rgba(244, 244, 245, 0.22);
+    border-radius: 3px;
+}
+
+.leaf-section-label {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: rgba(244, 244, 245, 0.35);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+
+.leaf-cover {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding-left: calc(var(--spacing-unit) * 2.5);
+}
+
+.cover-spacer {
+    flex: 1;
+}
+
+.cover-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 1.5);
+}
+
+.cover-date {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.35em;
+    color: rgba(244, 244, 245, 0.4);
+}
+
+.cover-rule {
+    width: 52px;
+    height: 1px;
+    background: rgba(244, 244, 245, 0.12);
+    position: relative;
+    margin: calc(var(--spacing-unit) * 0.5) auto;
+}
+
+/* Breaking the cover rule with a glyph rather than a gap, which is what makes the divider read as bookplate rather than border */
+.cover-rule-star {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.5rem;
+    color: rgba(244, 244, 245, 0.25);
+    background: rgba(10, 10, 14, 0.97);
+    padding: 0 7px;
+    line-height: 1;
+}
+
+.cover-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 5vw, 2.5rem);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    color: var(--color-starlight);
+}
+
+.cover-name-field {
+    margin-top: calc(var(--spacing-unit) * 0.75);
+    width: 100%;
+    max-width: 200px;
+}
+
+/* Styling the name field as a ruled blank, which is the one place the giver writes directly onto the book */
+.cover-name-input {
+    width: 100%;
+    padding: calc(var(--spacing-unit) * 0.5) 0;
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    font-weight: 400;
+    text-align: center;
+    color: var(--color-starlight);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(244, 244, 245, 0.12);
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.cover-name-input::placeholder {
+    color: rgba(244, 244, 245, 0.2);
+    font-style: italic;
+}
+
+.cover-name-input:focus {
+    border-bottom-color: rgba(244, 244, 245, 0.5);
+}
+
+.cover-hint {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: calc(var(--spacing-unit) * 0.5);
+    font-size: 0.625rem;
+    letter-spacing: 0.18em;
+    color: rgba(244, 244, 245, 0.18);
+}
+
+.leaf-hero {
+    padding: 0;
+    gap: 0;
+    padding-left: 0;
+}
+
+.leaf-hero .leaf-section-label {
+    position: absolute;
+    top: calc(var(--spacing-unit) * 1.25);
+    left: calc(var(--spacing-unit) * 3.5);
+    z-index: 2;
+    margin-bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    padding: calc(var(--spacing-unit) * 0.25) calc(var(--spacing-unit) * 0.6);
+    border-radius: 2px;
+    color: rgba(244, 244, 245, 0.75);
+    font-size: 0.5625rem;
+}
+
+/* Reserving the figure's proportions before its capture arrives, so a turned leaf does not reflow as it loads */
+.leaf-hero-frame {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.leaf-hero-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.leaf-hero-frame img.sb-img-loaded {
+    opacity: 1;
+}
+
+.leaf-hero-meta {
+    padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 3.5);
+    background: rgba(3, 3, 4, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(244, 244, 245, 0.04);
+}
+
+.leaf-hero-title {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    font-weight: 400;
+    margin-bottom: 0.15rem;
+    color: var(--color-starlight);
+}
+
+.leaf-hero-caption {
+    display: block;
+    font-size: 0.6875rem;
+    color: rgba(244, 244, 245, 0.5);
+    letter-spacing: 0.03em;
+}
+
+.leaf-picker-tray {
+    padding: calc(var(--spacing-unit) * 0.6) calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 0.6) calc(var(--spacing-unit) * 3.5);
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+    background: rgba(3, 3, 4, 0.92);
+}
+
+/* Confining the strip's scroll to itself, so dragging through alternates never turns the page underneath */
+.leaf-picker-scroll {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 0.5);
+    overflow-x: auto;
+    padding-bottom: calc(var(--spacing-unit) * 0.3);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(244, 244, 245, 0.06) transparent;
+    -webkit-overflow-scrolling: touch;
+}
+
+.leaf-picker-scroll::-webkit-scrollbar {
+    height: 2px;
+}
+
+.leaf-picker-scroll::-webkit-scrollbar-thumb {
+    background: rgba(244, 244, 245, 0.06);
+    border-radius: 1px;
+}
+
+/* Keeping the alternates smaller than in the scroll template, because a leaf has far less width to give them */
+.leaf-thumb {
+    flex: 0 0 58px;
+    height: 44px;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid transparent;
+    opacity: 0.45;
+    cursor: pointer;
+    transition: opacity 0.25s ease, border-color 0.25s ease;
+    touch-action: manipulation;
+}
+
+.leaf-thumb:hover {
+    opacity: 0.8;
+}
+
+.leaf-thumb.leaf-thumb-active {
+    opacity: 1;
+    border-color: var(--color-starlight);
+}
+
+.leaf-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.leaf-thumb-year {
+    position: absolute;
+    bottom: 1px;
+    right: 2px;
+    font-size: 0.5rem;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 0 2px;
+    border-radius: 1px;
+    letter-spacing: 0.03em;
+    color: rgba(244, 244, 245, 0.7);
+}
+
+/* Laying the figures out as a grid so the numbers align down the page however many digits each one carries */
+.leaf-vitals {
+    justify-content: center;
+}
+
+.vitals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(var(--spacing-unit) * 1.25);
+    flex: 1;
+    align-content: center;
+}
+
+.vitals-cell {
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(244, 244, 245, 0.05);
+    border-left: 2px solid rgba(244, 244, 245, 0.08);
+    border-radius: 0 2px 2px 0;
+    padding: calc(var(--spacing-unit) * 1.25) calc(var(--spacing-unit) * 1);
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 0.3);
+}
+
+.vitals-label {
+    font-size: 0.5625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: rgba(244, 244, 245, 0.3);
+}
+
+.vitals-figure {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 400;
+    color: var(--color-starlight);
+    line-height: 1.2;
+}
+
+.vitals-note {
+    font-size: 0.625rem;
+    color: rgba(244, 244, 245, 0.4);
+}
+
+.leaf-enrichment {
+    justify-content: center;
+}
+
+.leaf-enrichment-dormant {
+    text-align: center;
+    padding: calc(var(--spacing-unit) * 3) calc(var(--spacing-unit) * 1.5);
+    border: 1px dashed rgba(244, 244, 245, 0.06);
+    border-radius: 2px;
+}
+
+.leaf-dormant-text {
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: rgba(244, 244, 245, 0.4);
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
+}
+
+.leaf-opt-in-btn {
+    padding: calc(var(--spacing-unit) * 0.55) calc(var(--spacing-unit) * 1.25);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    background: transparent;
+    border: 1px solid rgba(244, 244, 245, 0.15);
+    color: rgba(244, 244, 245, 0.5);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.leaf-opt-in-btn:hover {
+    border-color: var(--color-starlight);
+    color: var(--color-starlight);
+}
+
+.leaf-enrichment-zone {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 1.5);
+}
+
+.leaf-enrichment-card {
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(244, 244, 245, 0.05);
+    border-left: 2px solid rgba(244, 244, 245, 0.12);
+    border-radius: 0 2px 2px 0;
+    padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2);
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 0.5);
+}
+
+.leaf-enrichment-value {
+    font-family: var(--font-display);
+    font-size: 1.625rem;
+    font-weight: 400;
+    color: var(--color-starlight);
+    line-height: 1.1;
+}
+
+.leaf-planet-name {
+    font-size: 1.25rem;
+}
+
+.leaf-enrichment-host {
+    font-size: 0.75rem;
+    color: rgba(244, 244, 245, 0.4);
+}
+
+.leaf-enrichment-caption {
+    font-size: 0.6875rem;
+    color: rgba(244, 244, 245, 0.5);
+    letter-spacing: 0.03em;
+    margin-top: calc(var(--spacing-unit) * 0.2);
+}
+
+.leaf-enrichment-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--spacing-unit) * 0.35) calc(var(--spacing-unit) * 1);
+    margin-top: calc(var(--spacing-unit) * 0.4);
+}
+
+.leaf-detail-item {
+    font-size: 0.625rem;
+    color: rgba(244, 244, 245, 0.35);
+}
+
+.leaf-enrichment-picks {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 0.5);
+    overflow-x: auto;
+    padding-bottom: calc(var(--spacing-unit) * 0.4);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(244, 244, 245, 0.06) transparent;
+    -webkit-overflow-scrolling: touch;
+}
+
+.leaf-enrichment-picks::-webkit-scrollbar {
+    height: 2px;
+}
+
+.leaf-enrichment-picks::-webkit-scrollbar-thumb {
+    background: rgba(244, 244, 245, 0.06);
+    border-radius: 1px;
+}
+
+.leaf-pick {
+    flex: 0 0 auto;
+    min-width: 54px;
+    min-height: 44px;
+    padding: calc(var(--spacing-unit) * 0.5) calc(var(--spacing-unit) * 0.65);
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.015);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: opacity 0.25s ease, border-color 0.25s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(244, 244, 245, 0.05);
+}
+
+.leaf-pick:hover {
+    opacity: 0.75;
+}
+
+.leaf-pick.leaf-pick-active {
+    opacity: 1;
+    border-color: var(--color-starlight);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.leaf-pick-main {
+    font-family: var(--font-display);
+    font-size: 0.6875rem;
+    color: var(--color-starlight);
+    white-space: nowrap;
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.leaf-pick-sub {
+    font-size: 0.4375rem;
+    color: rgba(244, 244, 245, 0.35);
+    letter-spacing: 0.05em;
+}
+
+.leaf-narrative {
+    gap: calc(var(--spacing-unit) * 1.25);
+}
+
+.leaf-narrative-field {
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: rgba(244, 244, 245, 0.85);
+    background: transparent;
+    border: none;
+    border-left: 1px solid rgba(244, 244, 245, 0.15);
+    padding: calc(var(--spacing-unit) * 1.25) calc(var(--spacing-unit) * 1.75);
+    outline: none;
+    width: 100%;
+    flex: 0 0 auto;
+    resize: none;
+}
+
+.leaf-narrative-field:focus {
+    background: rgba(255, 255, 255, 0.015);
+    border-left-color: var(--color-starlight);
+}
+
+.leaf-style-block {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 0.75);
+}
+
+.leaf-style-label {
+    font-size: 0.5625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: rgba(244, 244, 245, 0.3);
+}
+
+.leaf-style-input {
+    width: 100%;
+    min-height: 80px;
+    padding: calc(var(--spacing-unit) * 0.8);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    border: 1px solid rgba(244, 244, 245, 0.06);
+    background: rgba(0, 0, 0, 0.25);
+    color: var(--color-starlight);
+    resize: none;
+    border-radius: 2px;
+    outline: none;
+}
+
+.leaf-style-input:focus {
+    border-color: rgba(244, 244, 245, 0.25);
+}
+
+.leaf-style-input::placeholder {
+    color: rgba(244, 244, 245, 0.2);
+    font-style: italic;
+}
+
+.leaf-style-btn {
+    align-self: flex-end;
+    padding: calc(var(--spacing-unit) * 0.5) calc(var(--spacing-unit) * 1);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    background: transparent;
+    border: 1px solid rgba(244, 244, 245, 0.2);
+    color: rgba(244, 244, 245, 0.7);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.leaf-style-btn:hover {
+    border-color: var(--color-starlight);
+    color: var(--color-starlight);
+}
+
+.leaf-style-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.leaf-share {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding-left: calc(var(--spacing-unit) * 2.5);
+}
+
+.share-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 2);
+}
+
+.share-heading {
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    font-weight: 400;
+    color: var(--color-starlight);
+}
+
+.share-subtext {
+    font-size: 0.75rem;
+    color: rgba(244, 244, 245, 0.35);
+    margin-top: calc(var(--spacing-unit) * -1);
+}
+
+.share-actions {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 1);
+    width: 100%;
+    max-width: 220px;
+}
+
+.share-btn {
+    padding: calc(var(--spacing-unit) * 0.85) calc(var(--spacing-unit) * 1.5);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+
+.share-btn:hover {
+    opacity: 0.82;
+}
+
+.share-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.share-btn-primary {
+    background: var(--color-starlight);
+    color: var(--color-void);
+    border: none;
+}
+
+.share-btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(244, 244, 245, 0.1);
+    color: rgba(244, 244, 245, 0.6);
+}
+
+/* Keeping the controls outside the turning volume, where a three-dimensional transform cannot intercept their taps */
+.storybook-nav {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 2.5);
+    width: 100%;
+    max-width: 400px;
+    justify-content: center;
+}
+
+.sb-nav-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(244, 244, 245, 0.08);
+    background: rgba(255, 255, 255, 0.015);
+    color: var(--color-starlight);
+    font-size: 1.25rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
+}
+
+.sb-nav-btn:hover {
+    border-color: rgba(244, 244, 245, 0.25);
+    transform: scale(1.06);
+}
+
+.sb-nav-btn:disabled {
+    opacity: 0.15;
+    cursor: default;
+    transform: none;
+}
+
+.sb-page-counter {
+    font-size: 0.5625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgba(244, 244, 245, 0.25);
+    min-width: 60px;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    .storybook-stage {
+        padding: calc(var(--spacing-unit) * 1);
+        gap: calc(var(--spacing-unit) * 1.5);
+    }
+
+    .storybook-viewport {
+        height: 78vh;
+        height: 78dvh;
+    }
+
+    #sb-leaf-cover {
+        background: linear-gradient(to right,
+                rgb(6, 6, 9) 0%,
+                rgb(10, 10, 14) 5%,
+                rgb(12, 12, 16) 100%);
+    }
+
+    .leaf-inner {
+        padding: calc(var(--spacing-unit) * 2.5) calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 2.5) calc(var(--spacing-unit) * 3);
+    }
+
+    .cover-title {
+        font-size: clamp(1.4rem, 4.5vw, 2rem);
+    }
+
+    .vitals-figure {
+        font-size: 1rem;
+    }
+
+    .leaf-enrichment-value {
+        font-size: 1.375rem;
+    }
+
+    .leaf-narrative-field {
+        font-size: 0.875rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .storybook-leaf {
+        transition: opacity 0.25s ease;
+    }
+
+    .storybook-leaf.leaf-turned {
+        opacity: 0;
+        transform: rotateY(0deg);
+    }
+
+    .leaf-thumb,
+    .leaf-pick,
+    .sb-nav-btn,
+    .share-btn {
+        transition: none;
+    }
+}
+
+.cover-name-field .cover-name-rendered {
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    color: var(--color-starlight);
+    text-align: center;
+}
+
+.leaf-narrative-readonly {
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: rgba(244, 244, 245, 0.85);
+    border-left: 1px solid rgba(244, 244, 245, 0.15);
+    padding: calc(var(--spacing-unit) * 1.25) calc(var(--spacing-unit) * 1.75);
+    width: 100%;
+}
+
+.leaf-narrative .personal-message-panel {
+    margin-top: calc(var(--spacing-unit) * 1.5);
+    padding-top: calc(var(--spacing-unit) * 1.5);
+    border-top: 1px solid rgba(244, 244, 245, 0.08);
+}
+
+.leaf-narrative .personal-message-body {
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    text-align: center;
+    color: var(--color-starlight);
+}
+
+a.share-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.share-link-readout {
+    display: block;
+    margin-top: calc(var(--spacing-unit) * 0.75);
+    font-family: var(--font-mono, monospace);
+    font-size: 0.72rem;
+    color: var(--color-nebula, #8b8b9a);
+    word-break: break-all;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}

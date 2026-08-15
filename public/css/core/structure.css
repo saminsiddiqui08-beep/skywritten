@@ -1,0 +1,369 @@
+:root {
+    color-scheme: dark;
+    --color-void: #030304;
+    --color-starlight: #f4f4f5;
+    --color-nebula-dim: rgba(255, 255, 255, 0.1);
+    --color-nebula-active: rgba(255, 255, 255, 0.8);
+    --font-primary: 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    --font-display: 'Playfair Display', 'Georgia', serif;
+    --spacing-unit: 1rem;
+    --z-ambient: -10;
+    --z-surface: 10;
+    --z-overlay: 100;
+}
+
+body {
+    background-color: var(--color-void);
+    color: var(--color-starlight);
+    font-family: var(--font-primary);
+    line-height: 1.5;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(244, 244, 245, 0.18) transparent;
+}
+
+body::-webkit-scrollbar {
+    width: 6px;
+}
+
+body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+    background: rgba(244, 244, 245, 0.18);
+    border-radius: 3px;
+}
+
+/* Sizing the canvas from the large viewport rather than the dynamic one, so a mobile address bar sliding away cannot force a full starfield rebuild mid-scroll */
+#ambient-starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: var(--z-ambient);
+    pointer-events: none;
+}
+
+/* Fading the entry panel out on reveal rather than removing it, which keeps the layout stable while the template mounts underneath */
+#app-core {
+    position: relative;
+    z-index: var(--z-surface);
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 1.5);
+    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.ingest-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 3);
+    width: 100%;
+    max-width: 400px;
+}
+
+/* Letting the wordmark carry the whole entry screen, which is why it is the only element here at display scale */
+.brand-mark {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin: 0;
+    text-align: center;
+}
+
+#date-ingest {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: calc(var(--spacing-unit) * 1.5);
+}
+
+.date-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border-bottom: 1px solid var(--color-nebula-dim);
+    transition: border-color 0.3s ease;
+}
+
+/* Styling the wrapper rather than the input, because a date field renders its own internal spin controls that cannot be reached from here */
+.date-field:focus-within {
+    border-bottom-color: var(--color-nebula-active);
+}
+
+#target-date {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2.75);
+    font-size: 1.25rem;
+    color: var(--color-starlight);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* Hiding the native indicator so the bespoke calendar button can sit in its place without two icons competing */
+#target-date::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+#target-date::-webkit-datetime-edit {
+    text-align: center;
+}
+
+#target-date::-webkit-date-and-time-value {
+    text-align: center;
+}
+
+.date-field:not(.has-value):not(:focus-within) #target-date,
+.date-field:not(.has-value):not(:focus-within) #target-date::-webkit-datetime-edit {
+    color: transparent;
+}
+
+/* Standing in for a placeholder the date input will not render itself, positioned to sit exactly where its own text would */
+.date-placeholder {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.25rem;
+    letter-spacing: 0.1em;
+    text-align: center;
+    color: rgba(244, 244, 245, 0.4);
+    pointer-events: none;
+}
+
+.date-field.has-value .date-placeholder,
+.date-field:focus-within .date-placeholder {
+    display: none;
+}
+
+.date-picker-trigger {
+    position: absolute;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: var(--color-starlight);
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+}
+
+.date-picker-trigger:hover,
+.date-picker-trigger:focus-visible {
+    opacity: 0.95;
+}
+
+.date-picker-trigger:focus-visible {
+    outline: 1px solid var(--color-starlight);
+    outline-offset: -8px;
+}
+
+.date-picker-trigger svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.25;
+    stroke-linecap: round;
+}
+
+.template-toggle-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 0.5);
+    width: 100%;
+    margin: calc(var(--spacing-unit) * 1.5) 0 calc(var(--spacing-unit) * 0.5);
+}
+
+.template-toggle-label {
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: rgba(244, 244, 245, 0.35);
+}
+
+/* Presenting the three presentations as one segmented control, so the choice reads as a single decision rather than three options */
+.template-toggle {
+    display: flex;
+    width: 100%;
+    border: 1px solid var(--color-nebula-dim);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.toggle-radio {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.toggle-option {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    cursor: pointer;
+}
+
+.toggle-option+.toggle-option {
+    border-left: 1px solid var(--color-nebula-dim);
+}
+
+/* Carrying the entire visual state of the choice, since the radio itself is hidden and cannot be styled reliably across browsers */
+.toggle-face {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 52px;
+    padding: calc(var(--spacing-unit) * 0.6) calc(var(--spacing-unit) * 0.35);
+    text-align: center;
+    opacity: 0.35;
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+}
+
+.toggle-radio:checked+.toggle-face {
+    opacity: 1;
+    background: rgba(244, 244, 245, 0.04);
+}
+
+.toggle-radio:focus-visible+.toggle-face {
+    outline: 1px solid var(--color-starlight);
+    outline-offset: -1px;
+}
+
+.toggle-name {
+    font-size: clamp(0.625rem, 2.8vw, 0.75rem);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-starlight);
+    white-space: nowrap;
+}
+
+.toggle-hint {
+    font-size: clamp(0.5rem, 2.2vw, 0.5625rem);
+    line-height: 1.3;
+    color: rgba(244, 244, 245, 0.4);
+    letter-spacing: 0.04em;
+}
+
+/* Inverting the primary action against the dark field, the only fully opaque light surface before the reveal */
+#initiate-reveal {
+    padding: calc(var(--spacing-unit) * 1.25) calc(var(--spacing-unit) * 2);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--color-void);
+    background-color: var(--color-starlight);
+    border-radius: 2px;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
+}
+
+#initiate-reveal:hover {
+    transform: translateY(-2px);
+}
+
+#initiate-reveal:active {
+    transform: translateY(1px);
+}
+
+.field-tally {
+    display: block;
+    text-align: right;
+    font-size: 0.625rem;
+    letter-spacing: 0.1em;
+    color: rgba(244, 244, 245, 0.3);
+    margin-top: calc(var(--spacing-unit) * 0.35);
+    transition: color 0.3s ease;
+}
+
+.field-tally.tally-warn {
+    color: #e0a24a;
+}
+
+.field-tally.tally-full {
+    color: #d9695a;
+}
+
+#template-root {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    z-index: var(--z-overlay);
+    pointer-events: none;
+}
+
+#template-root.active-layer {
+    pointer-events: auto;
+}
+
+.recipient-name-rendered {
+    display: inline-block;
+    color: var(--color-starlight);
+}
+
+.narrative-readonly {
+    white-space: pre-wrap;
+}
+
+.personal-message-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 0.75);
+}
+
+.personal-message-mark {
+    font-size: 0.75rem;
+    line-height: 1;
+    opacity: 0.3;
+}
+
+.personal-message-body {
+    white-space: pre-wrap;
+    font-style: italic;
+}
+
+.lapsed-gift {
+    gap: calc(var(--spacing-unit) * 2);
+    text-align: center;
+}
+
+.lapsed-message {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: rgba(244, 244, 245, 0.45);
+    max-width: 34ch;
+}
+
+.lapsed-action {
+    padding: calc(var(--spacing-unit) * 0.9) calc(var(--spacing-unit) * 2);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--color-starlight);
+    border: 1px solid var(--color-nebula-dim);
+    border-radius: 2px;
+    transition: border-color 0.3s ease;
+}
+
+.lapsed-action:hover {
+    border-color: var(--color-nebula-active);
+}

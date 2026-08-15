@@ -1,0 +1,678 @@
+.cosmic-stage {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: calc(var(--spacing-unit) * 4) calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 6);
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    opacity: 0;
+    transition: opacity 0.6s ease-out;
+}
+
+.cosmic-stage.stage-ready {
+    opacity: 1;
+}
+
+/* Moving each section on transform and opacity only, which keeps the reveal on the compositor rather than triggering layout on every scroll step */
+.reveal-node {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+.reveal-node.node-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.cosmic-header-panel {
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+}
+
+.date-badge {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: rgba(244, 244, 245, 0.5);
+    margin-bottom: calc(var(--spacing-unit) * 1);
+    display: block;
+}
+
+/* Leading each biography with the same headline scale as the entry screen, so the reveal reads as the same document continuing */
+.cosmic-headline {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
+}
+
+.recipient-field {
+    margin-top: calc(var(--spacing-unit) * 0.5);
+}
+
+.recipient-name-input {
+    width: 100%;
+    max-width: 320px;
+    padding: calc(var(--spacing-unit) * 0.75) 0;
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 400;
+    text-align: center;
+    color: var(--color-starlight);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--color-nebula-dim);
+    outline: none;
+    letter-spacing: 0.01em;
+    transition: border-color 0.3s ease;
+}
+
+.recipient-name-input::placeholder {
+    color: rgba(244, 244, 245, 0.3);
+    font-style: italic;
+}
+
+.recipient-name-input:focus {
+    border-bottom-color: var(--color-starlight);
+}
+
+.hero-viewport {
+    width: 100%;
+    max-width: 720px;
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--color-nebula-dim);
+}
+
+/* Marking each capture with its source so a reader can tell an observatory image from an Earth photograph without reading the caption */
+.hero-source-label {
+    position: absolute;
+    top: calc(var(--spacing-unit) * 1.5);
+    left: calc(var(--spacing-unit) * 1.5);
+    z-index: 2;
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: rgba(244, 244, 245, 0.85);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    padding: calc(var(--spacing-unit) * 0.35) calc(var(--spacing-unit) * 0.75);
+    border-radius: 2px;
+}
+
+/* Reserving the frame before the capture arrives, so a slow archive image cannot shift everything below it once it loads */
+.hero-image-frame {
+    width: 100%;
+    /* Holding the frame's proportions before the capture arrives, which is what stops the caption below from jumping when it does */
+    aspect-ratio: 16 / 9;
+    position: relative;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    transition: opacity 0.4s ease;
+}
+
+.hero-image-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+.hero-image-frame img.img-loaded {
+    opacity: 1;
+}
+
+/* Sitting the metadata directly beneath the frame so caption and capture are read as one unit */
+.hero-meta-strip {
+    padding: calc(var(--spacing-unit) * 1.5);
+    background: rgba(3, 3, 4, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--color-nebula-dim);
+}
+
+.hero-title-text {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 400;
+    margin-bottom: 0.25rem;
+}
+
+/* Keeping the attribution quiet but present, because every capture here belongs to a public archive and should say so */
+.hero-attribution {
+    font-size: 0.75rem;
+    color: rgba(244, 244, 245, 0.6);
+    letter-spacing: 0.05em;
+}
+
+.picker-section {
+    width: 100%;
+    max-width: 720px;
+}
+
+.picker-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: rgba(244, 244, 245, 0.5);
+    margin-bottom: calc(var(--spacing-unit) * 1);
+    display: block;
+}
+
+/* Scrolling the alternates horizontally rather than wrapping them, which keeps the hero and its options in view together on a phone */
+.picker-carousel {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 1);
+    overflow-x: auto;
+    padding-bottom: calc(var(--spacing-unit) * 1);
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-nebula-dim) transparent;
+    -webkit-overflow-scrolling: touch;
+}
+
+.picker-carousel::-webkit-scrollbar {
+    height: 3px;
+}
+
+.picker-carousel::-webkit-scrollbar-thumb {
+    background: var(--color-nebula-dim);
+    border-radius: 2px;
+}
+
+/* Sizing the strip entries small enough that a whole decade of alternates fits within one thumb's reach */
+.thumb-node {
+    flex: 0 0 100px;
+    height: 70px;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid transparent;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    opacity: 0.6;
+    cursor: pointer;
+}
+
+.thumb-node:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.thumb-node.thumb-selected {
+    opacity: 1;
+    border-color: var(--color-starlight);
+}
+
+.thumb-node img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Labelling every alternate with its year, which is the only thing distinguishing one thumbnail from another */
+.thumb-year-tag {
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    font-size: 0.625rem;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 1px 4px;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+}
+
+.enrichment-panel {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 1.5);
+}
+
+.enrichment-section-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgba(244, 244, 245, 0.5);
+}
+
+/* Presenting an unmatched source as an invitation rather than a result, since a flare from a neighbouring year is the giver's choice to make */
+.enrichment-dormant {
+    text-align: center;
+    padding: calc(var(--spacing-unit) * 3) calc(var(--spacing-unit) * 2);
+    border: 1px dashed var(--color-nebula-dim);
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.enrichment-toggle-prompt {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: rgba(244, 244, 245, 0.5);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+
+/* Making the opt-in read as a quiet offer rather than a call to action, since declining it is a perfectly good outcome */
+.enrichment-opt-in-btn {
+    padding: calc(var(--spacing-unit) * 0.75) calc(var(--spacing-unit) * 1.5);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    background: transparent;
+    border: 1px solid rgba(244, 244, 245, 0.25);
+    color: rgba(244, 244, 245, 0.7);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.enrichment-opt-in-btn:hover {
+    border-color: var(--color-starlight);
+    color: var(--color-starlight);
+}
+
+.enrichment-active-zone {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 1.5);
+}
+
+.enrichment-featured {
+    background: rgba(255, 255, 255, 0.015);
+    border: 1px solid var(--color-nebula-dim);
+    border-left: 2px solid rgba(244, 244, 245, 0.25);
+    padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 2.5);
+    border-radius: 0 2px 2px 0;
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 0.75);
+}
+
+.featured-class-indicator {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--color-starlight);
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+}
+
+.featured-planet-name {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--color-starlight);
+    line-height: 1.2;
+}
+
+.featured-host-star {
+    font-size: 0.875rem;
+    color: rgba(244, 244, 245, 0.5);
+    margin-top: calc(var(--spacing-unit) * -0.25);
+}
+
+.featured-attribution {
+    font-size: 0.75rem;
+    color: rgba(244, 244, 245, 0.6);
+    letter-spacing: 0.05em;
+    margin-top: calc(var(--spacing-unit) * 0.25);
+}
+
+.featured-detail-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--spacing-unit) * 0.5) calc(var(--spacing-unit) * 1.5);
+    margin-top: calc(var(--spacing-unit) * 0.5);
+}
+
+.detail-fragment {
+    font-size: 0.75rem;
+    color: rgba(244, 244, 245, 0.45);
+    letter-spacing: 0.03em;
+}
+
+.enrichment-picker-strip {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 0.75);
+    overflow-x: auto;
+    padding-bottom: calc(var(--spacing-unit) * 0.75);
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-nebula-dim) transparent;
+    -webkit-overflow-scrolling: touch;
+}
+
+.enrichment-picker-strip::-webkit-scrollbar {
+    height: 3px;
+}
+
+.enrichment-picker-strip::-webkit-scrollbar-thumb {
+    background: var(--color-nebula-dim);
+    border-radius: 2px;
+}
+
+.enrichment-pick-node {
+    flex: 0 0 auto;
+    min-width: 72px;
+    padding: calc(var(--spacing-unit) * 0.5) calc(var(--spacing-unit) * 0.75);
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.02);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+}
+
+.enrichment-pick-node:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+}
+
+.enrichment-pick-node.enrichment-pick-selected {
+    opacity: 1;
+    border-color: var(--color-starlight);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.pick-class-badge {
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--color-starlight);
+    letter-spacing: 0.02em;
+}
+
+.pick-planet-badge {
+    font-size: 0.6875rem;
+    color: rgba(244, 244, 245, 0.8);
+    white-space: nowrap;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pick-year-tag {
+    font-size: 0.5625rem;
+    color: rgba(244, 244, 245, 0.4);
+    letter-spacing: 0.08em;
+}
+
+.telemetry-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: calc(var(--spacing-unit) * 2);
+    width: 100%;
+    max-width: 720px;
+}
+
+.telemetry-node {
+    background: rgba(255, 255, 255, 0.015);
+    border: 1px solid var(--color-nebula-dim);
+    padding: calc(var(--spacing-unit) * 2);
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 0.5);
+}
+
+.telemetry-heading {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgba(244, 244, 245, 0.4);
+}
+
+.telemetry-value {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: var(--color-starlight);
+}
+
+.telemetry-detail {
+    font-size: 0.8125rem;
+    color: rgba(244, 244, 245, 0.6);
+}
+
+.narrative-stage {
+    width: 100%;
+    max-width: 680px;
+    background: rgba(255, 255, 255, 0.01);
+    border-left: 1px solid var(--color-starlight);
+    padding: calc(var(--spacing-unit) * 2.5) calc(var(--spacing-unit) * 3);
+    margin: calc(var(--spacing-unit) * 2) 0;
+}
+
+.narrative-output {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    line-height: 1.7;
+    color: rgba(244, 244, 245, 0.9);
+    outline: none;
+    border: none;
+    background: transparent;
+    width: 100%;
+    resize: none;
+}
+
+.narrative-output:focus {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.style-transform-block {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 1);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--color-nebula-dim);
+    padding: calc(var(--spacing-unit) * 2);
+    border-radius: 2px;
+}
+
+.style-block-label {
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgba(244, 244, 245, 0.3);
+}
+
+.style-input-field {
+    width: 100%;
+    min-height: 120px;
+    padding: calc(var(--spacing-unit) * 1);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    border: 1px solid var(--color-nebula-dim);
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--color-starlight);
+    resize: vertical;
+    border-radius: 2px;
+}
+
+.style-input-field::placeholder {
+    color: rgba(244, 244, 245, 0.2);
+    font-style: italic;
+}
+
+.style-input-field:focus {
+    border-color: var(--color-starlight);
+}
+
+.transform-action-btn {
+    align-self: flex-end;
+    padding: calc(var(--spacing-unit) * 0.75) calc(var(--spacing-unit) * 1.5);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    background: transparent;
+    border: 1px solid var(--color-starlight);
+    color: var(--color-starlight);
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.transform-action-btn:hover {
+    background: var(--color-starlight);
+    color: var(--color-void);
+}
+
+.transform-action-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.action-bar-footer {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 2);
+    margin-top: calc(var(--spacing-unit) * 3);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.action-trigger {
+    padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2.5);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.action-primary {
+    background: var(--color-starlight);
+    color: var(--color-void);
+}
+
+.action-secondary {
+    background: transparent;
+    border: 1px solid var(--color-nebula-dim);
+    color: var(--color-starlight);
+}
+
+.action-trigger:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.action-trigger:disabled {
+    opacity: 0.4;
+    cursor: default;
+    transform: none;
+}
+
+/* Collapsing to a single column below the width where two columns would leave neither one readable */
+@media (max-width: 600px) {
+    .cosmic-stage {
+        padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 4);
+        gap: calc(var(--spacing-unit) * 4);
+    }
+
+    .recipient-name-input {
+        max-width: 260px;
+        font-size: 1rem;
+    }
+
+    .hero-source-label {
+        top: calc(var(--spacing-unit) * 1);
+        left: calc(var(--spacing-unit) * 1);
+        font-size: 0.5625rem;
+    }
+
+    .enrichment-dormant {
+        padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 1.5);
+    }
+
+    .enrichment-featured {
+        padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2);
+    }
+
+    .featured-class-indicator {
+        font-size: 1.625rem;
+    }
+
+    .featured-planet-name {
+        font-size: 1.25rem;
+    }
+
+    .telemetry-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .narrative-stage {
+        padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2);
+    }
+
+    .narrative-output {
+        font-size: 1.125rem;
+    }
+}
+
+.recipient-field .recipient-name-rendered {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    letter-spacing: 0.01em;
+    color: var(--color-starlight);
+    text-align: center;
+}
+
+.narrative-stage .narrative-readonly {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    line-height: 1.7;
+    color: rgba(244, 244, 245, 0.9);
+    width: 100%;
+}
+
+.cosmic-stage .personal-message-panel {
+    width: 100%;
+    max-width: 620px;
+    padding: calc(var(--spacing-unit) * 2.5) calc(var(--spacing-unit) * 1.5);
+    border-top: 1px solid var(--color-nebula-dim);
+    border-bottom: 1px solid var(--color-nebula-dim);
+}
+
+.cosmic-stage .personal-message-body {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1.65;
+    text-align: center;
+    color: var(--color-starlight);
+}
+
+a.action-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.share-link-readout {
+    display: block;
+    margin-top: calc(var(--spacing-unit) * 0.75);
+    font-family: var(--font-mono, monospace);
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    color: var(--color-nebula, #8b8b9a);
+    word-break: break-all;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}

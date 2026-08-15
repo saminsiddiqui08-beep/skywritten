@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#030304">
+    <title>Skywritten — The Universe on the Day You Arrived</title>
+    <meta name="description"
+        content="Build a personalised universe biography from real NASA archives: the deep-sky image published on a birthday, Earth from a million miles away, solar flares and worlds discovered that year.">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Skywritten">
+    <meta property="og:url" content="https://skywritten.pages.dev/">
+    <meta property="og:title" content="Skywritten — The Universe on the Day You Arrived">
+    <meta property="og:description"
+        content="Turn a birthday into an astronomical biography, drawn from real NASA archives.">
+    <meta property="og:image" content="https://skywritten.pages.dev/og-default.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt"
+        content="A Skywritten gift page showing a NASA archive image beneath a personal message.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://skywritten.pages.dev/og-default.jpg">
+    <link rel="stylesheet" href="css/core/foundation.css">
+    <link rel="stylesheet" href="css/core/structure.css">
+    <link rel="stylesheet" href="css/templates/cosmic-scroll.css">
+    <link rel="stylesheet" href="css/templates/storybook.css">
+    <link rel="stylesheet" href="css/templates/keepsake-letter.css">
+</head>
+
+<body>
+    <canvas id="ambient-starfield"></canvas>
+
+    <main id="app-core">
+        <section class="ingest-wrapper">
+            <h1 class="brand-mark">Skywritten</h1>
+            <form id="date-ingest">
+                <div class="date-field">
+                    <input type="date" id="target-date" min="1900-01-01" required aria-label="Birth date">
+                    <span class="date-placeholder" id="date-placeholder" aria-hidden="true">MM / DD / YYYY</span>
+                    <button type="button" class="date-picker-trigger" id="date-picker-trigger"
+                        aria-label="Open the calendar">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <rect x="3.5" y="5.5" width="17" height="15" rx="1.5"></rect>
+                            <path d="M3.5 10h17"></path>
+                            <path d="M8 3.5v4"></path>
+                            <path d="M16 3.5v4"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="template-toggle-wrap">
+                    <span class="template-toggle-label">Presentation</span>
+                    <div class="template-toggle" id="template-toggle-group">
+                        <label class="toggle-option">
+                            <input type="radio" name="template-shell" value="cosmic-scroll" checked
+                                class="toggle-radio">
+                            <span class="toggle-face">
+                                <span class="toggle-name">Scroll</span>
+                                <span class="toggle-hint">Cinematic flow</span>
+                            </span>
+                        </label>
+                        <label class="toggle-option">
+                            <input type="radio" name="template-shell" value="storybook" class="toggle-radio">
+                            <span class="toggle-face">
+                                <span class="toggle-name">Storybook</span>
+                                <span class="toggle-hint">Page by page</span>
+                            </span>
+                        </label>
+                        <label class="toggle-option">
+                            <input type="radio" name="template-shell" value="keepsake-letter" class="toggle-radio">
+                            <span class="toggle-face">
+                                <span class="toggle-name">Letter</span>
+                                <span class="toggle-hint">Quiet &amp; personal</span>
+                            </span>
+                        </label>
+                    </div>
+                    <input type="hidden" id="template-select" value="cosmic-scroll">
+                </div>
+
+                <button type="submit" id="initiate-reveal">Reveal</button>
+            </form>
+        </section>
+    </main>
+
+    <div id="template-root"></div>
+
+    <script src="js/core/starfield.js"></script>
+    <script src="js/core/text-fields.js"></script>
+    <script src="js/templates/template-router.js"></script>
+    <script src="js/templates/cosmic-scroll.js"></script>
+    <script src="js/templates/storybook.js"></script>
+    <script src="js/templates/keepsake-letter.js"></script>
+    <script src="js/core/card-generator.js"></script>
+    <script src="js/core/skywritten.js"></script>
+    <script>
+        // Mirroring the visible radio group into a hidden field, so the reveal handler reads one value regardless of how the choice was made
+        document.getElementById('template-toggle-group').addEventListener('change', function (e) {
+            if (e.target.classList.contains('toggle-radio')) {
+                document.getElementById('template-select').value = e.target.value;
+            }
+        });
+
+        var dateField = document.querySelector('.date-field');
+        var dateInput = document.getElementById('target-date');
+
+        // Driving the placeholder from a class rather than the input's own placeholder attribute, which a date field ignores entirely
+        function syncDatePlaceholder() {
+            dateField.classList.toggle('has-value', dateInput.value !== '');
+        }
+
+        dateInput.addEventListener('input', syncDatePlaceholder);
+        dateInput.addEventListener('change', syncDatePlaceholder);
+        syncDatePlaceholder();
+
+        // Falling back to focus where showPicker is unavailable, so the calendar button still does something on older mobile browsers
+        document.getElementById('date-picker-trigger').addEventListener('click', function () {
+            if (typeof dateInput.showPicker === 'function') {
+                dateInput.showPicker();
+            } else {
+                dateInput.focus();
+            }
+        });
+    </script>
+</body>
+
+</html>

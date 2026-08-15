@@ -1,0 +1,21 @@
+{
+    "name": "skywritten",
+    "version": "1.0.0",
+    "description": "Bespoke cosmic memory generator and astronomical biography engine",
+    "private": true,
+    "scripts": {
+        "build:apod": "node scripts/build-apod-index.js",
+        "build:epic": "node scripts/build-epic-index.js",
+        "build:donki": "node scripts/build-donki-index.js",
+        "build:exoplanet": "node scripts/build-exoplanet-index.js",
+        "build:all": "npm run build:apod && npm run build:donki && npm run build:exoplanet && npm run build:epic"
+    },
+    "keywords": [
+        "astronomy",
+        "nasa-apod",
+        "cosmic-biography",
+        "cloudflare-pages"
+    ],
+    "author": "Samin Yasar Siddiqui",
+    "license": "AGPL-3.0-only"
+}

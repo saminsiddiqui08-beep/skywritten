@@ -1,0 +1,946 @@
+.letter-stage {
+    --envelope-body: rgb(195, 180, 158);
+    --envelope-flap: rgb(178, 163, 140);
+    --envelope-liner: rgb(215, 205, 188);
+    --seal-crimson: rgb(140, 35, 40);
+    --seal-deep: rgb(90, 18, 22);
+    --parchment: rgb(252, 248, 241);
+    --parchment-shadow: rgb(235, 228, 215);
+    --ink: rgb(32, 28, 24);
+    --ink-secondary: rgb(85, 78, 68);
+    --ink-faint: rgb(155, 145, 130);
+    --ink-ghost: rgb(195, 185, 170);
+
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: calc(var(--spacing-unit) * 3) calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 6);
+    position: relative;
+}
+
+.envelope-scene {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+    min-height: 70dvh;
+    width: 100%;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    will-change: opacity, transform;
+}
+
+.letter-stage.stage-ready .envelope-scene {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.letter-stage.opened .envelope-scene {
+    opacity: 0;
+    transform: translateY(30px);
+    pointer-events: none;
+    position: absolute;
+}
+
+.envelope-sleeve {
+    position: relative;
+    width: 320px;
+    max-width: 85vw;
+    aspect-ratio: 1.45 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.envelope-body {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, var(--envelope-body) 0%, var(--envelope-flap) 100%);
+    border-radius: 4px;
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.35),
+        0 1px 3px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    transform-style: preserve-3d;
+    /* Keeping the vanishing point close so the flap opening reads as a physical hinge at this small a scale */
+    perspective: 800px;
+}
+
+/* Rotating the flap from its top edge so the opening reads as a hinge rather than a panel sliding away */
+.envelope-flap {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    height: 55%;
+    background: linear-gradient(160deg, var(--envelope-flap) 20%, var(--envelope-body) 100%);
+    /* Cutting the flap to a true envelope triangle rather than faking it with borders, which would not survive the rotation */
+    clip-path: polygon(0 0, 50% 85%, 100% 0);
+    border-radius: 4px 4px 0 0;
+    z-index: 1;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transform-origin: top center;
+    transform: rotateX(0deg);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.15s;
+    will-change: transform;
+}
+
+.letter-stage.seal-cracking .envelope-flap {
+    transform: rotateX(-175deg);
+}
+
+/* Setting the address in the display serif at a slight angle, the only text in the project that imitates handwriting */
+.envelope-address {
+    position: relative;
+    z-index: 2;
+    font-family: var(--font-display);
+    font-size: clamp(1rem, 3vw, 1.25rem);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink-secondary);
+    text-align: center;
+    margin-top: 15%;
+}
+
+/* Making the seal the only obvious target on the page, since the whole template depends on the reader knowing to open it */
+.envelope-seal {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform: translate(-50%, 50%);
+    z-index: 3;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 35%,
+            var(--seal-crimson) 0%,
+            var(--seal-deep) 100%);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.4),
+        inset 0 1px 2px rgba(255, 255, 255, 0.12),
+        inset 0 -1px 3px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    will-change: transform;
+    animation: sealBreathe 3s ease-in-out infinite;
+}
+
+/* Breathing the seal gently before it is touched, which is the only cue that the envelope is meant to be opened at all */
+@keyframes sealBreathe {
+
+    0%,
+    100% {
+        transform: translate(-50%, 50%) scale(1);
+    }
+
+    50% {
+        transform: translate(-50%, 50%) scale(1.04);
+    }
+}
+
+.envelope-seal:hover {
+    animation: none;
+    transform: translate(-50%, 50%) scale(1.08);
+}
+
+.envelope-seal:active {
+    animation: none;
+    transform: translate(-50%, 50%) scale(0.95);
+}
+
+.envelope-seal:focus-visible {
+    outline: 2px solid rgba(255, 220, 180, 0.6);
+    outline-offset: 3px;
+    animation: none;
+    transform: translate(-50%, 50%) scale(1.08);
+}
+
+.seal-glyph {
+    font-size: 1.125rem;
+    color: rgba(255, 220, 180, 0.6);
+    line-height: 1;
+}
+
+.letter-stage.seal-cracking .envelope-seal {
+    animation: none;
+    transform: translate(-50%, 50%) scale(1.5) rotate(20deg);
+    opacity: 0;
+    transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.45s ease-out;
+}
+
+.envelope-hint {
+    position: relative;
+    z-index: 2;
+    margin-top: calc(var(--spacing-unit) * 2.5);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: rgba(244, 244, 245, 0.3);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.letter-stage.seal-cracking .envelope-hint {
+    opacity: 0;
+}
+
+/* Switching to a light surface here, the one place in the project that is not a night sky, because a letter that glows is not a letter */
+.letter-parchment {
+    width: 100%;
+    max-width: 560px;
+    background: var(--parchment);
+    border-radius: 3px;
+    box-shadow:
+        0 8px 40px rgba(0, 0, 0, 0.3),
+        0 2px 8px rgba(0, 0, 0, 0.15);
+    padding: calc(var(--spacing-unit) * 3) calc(var(--spacing-unit) * 2.5);
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 2);
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.9s ease-out 0.3s, transform 0.9s cubic-bezier(0.25, 1, 0.5, 1) 0.3s;
+    will-change: opacity, transform;
+    position: relative;
+}
+
+.letter-parchment::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--spacing-unit) * 2);
+    right: calc(var(--spacing-unit) * 2);
+    top: 33.3%;
+    height: 1px;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            var(--parchment-shadow) 15%,
+            var(--parchment-shadow) 85%,
+            transparent 100%);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.letter-parchment::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--spacing-unit) * 2);
+    right: calc(var(--spacing-unit) * 2);
+    top: 66.6%;
+    height: 1px;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            var(--parchment-shadow) 15%,
+            var(--parchment-shadow) 85%,
+            transparent 100%);
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+.letter-stage.opened .letter-parchment {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Setting the closing verse apart in italics, the one passage that is neither address nor archive */
+.letter-verse {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    will-change: opacity, transform;
+}
+
+.letter-verse.verse-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.letter-dateline {
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.35em;
+    color: var(--ink-faint);
+}
+
+.letter-heading {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-weight: 400;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-top: calc(var(--spacing-unit) * 0.25);
+}
+
+.letter-salutation {
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink-secondary);
+    margin-top: calc(var(--spacing-unit) * 1);
+}
+
+/* Setting the recipient's name on a ruled line in the body text, so it reads as handwritten into the letter rather than filled into a form */
+.letter-address-input {
+    width: auto;
+    max-width: 180px;
+    padding: 0 2px calc(var(--spacing-unit) * 0.25);
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink);
+    border-bottom: 1px solid var(--ink-ghost);
+    transition: border-color 0.3s ease;
+    display: inline;
+}
+
+.letter-address-input::placeholder {
+    color: var(--ink-ghost);
+    font-style: italic;
+}
+
+.letter-address-input:focus {
+    border-bottom-color: var(--ink-secondary);
+}
+
+.letter-rule {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 1.5);
+    padding: calc(var(--spacing-unit) * 0.25) 0;
+}
+
+.letter-rule::before,
+.letter-rule::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--ink-ghost);
+    opacity: 0.4;
+}
+
+/* Marking each division with the same glyph as the seal, so the letter and its envelope read as one object */
+.letter-rule-glyph {
+    font-size: 0.5rem;
+    color: var(--ink-ghost);
+    line-height: 1;
+}
+
+.letter-figure {
+    width: 100%;
+    background: white;
+    padding: 6px 6px 20px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    transform: rotate(-1deg);
+    will-change: transform;
+}
+
+.letter-figure-apod {
+    transform: rotate(-1.2deg);
+}
+
+.letter-figure-epic {
+    transform: rotate(1.5deg);
+    max-width: 80%;
+    align-self: flex-end;
+}
+
+/* Tagging each photograph with its archive in small caps, matching how the rest of the letter treats proper names */
+.letter-figure-source {
+    font-size: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: var(--ink-ghost);
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* Reserving the photograph's proportions before it arrives, so the prose beneath it does not shift as the letter is read */
+.letter-figure-frame {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    position: relative;
+    background: rgb(230, 225, 218);
+}
+
+.letter-figure-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.letter-figure-frame img.kl-img-loaded {
+    opacity: 1;
+}
+
+.letter-figure-meta {
+    margin-top: 6px;
+}
+
+/* Setting captions in the serif at a smaller size so a photograph reads as pasted into the letter rather than printed with it */
+.letter-figure-title {
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.3;
+}
+
+.letter-figure-caption {
+    font-size: 0.625rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.03em;
+    margin-top: 1px;
+}
+
+.letter-picker-tray {
+    margin-top: calc(var(--spacing-unit) * 0.75);
+    transform: rotate(0deg);
+}
+
+.letter-picker-label {
+    font-size: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-ghost);
+    margin-bottom: calc(var(--spacing-unit) * 0.4);
+    display: block;
+}
+
+.letter-picker-scroll {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 0.5);
+    overflow-x: auto;
+    padding-bottom: calc(var(--spacing-unit) * 0.4);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(32, 28, 24, 0.28) rgba(32, 28, 24, 0.06);
+    -webkit-overflow-scrolling: touch;
+}
+
+.letter-picker-scroll::-webkit-scrollbar {
+    height: 6px;
+}
+
+.letter-picker-scroll::-webkit-scrollbar-track {
+    background: rgba(32, 28, 24, 0.06);
+    border-radius: 3px;
+}
+
+.letter-picker-scroll::-webkit-scrollbar-thumb {
+    background: rgba(32, 28, 24, 0.28);
+    border-radius: 3px;
+}
+
+.letter-thumb {
+    flex: 0 0 52px;
+    height: 40px;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid transparent;
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity 0.25s ease, border-color 0.25s ease;
+    touch-action: manipulation;
+}
+
+.letter-thumb:hover {
+    opacity: 0.8;
+}
+
+.letter-thumb.letter-thumb-active {
+    opacity: 1;
+    border-color: var(--ink-secondary);
+}
+
+.letter-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.letter-thumb-year {
+    position: absolute;
+    bottom: 1px;
+    right: 2px;
+    font-size: 0.4375rem;
+    background: rgba(0, 0, 0, 0.65);
+    color: white;
+    padding: 0 2px;
+    border-radius: 1px;
+    letter-spacing: 0.03em;
+}
+
+.letter-vitals-prose {
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 400;
+    line-height: 1.75;
+    color: var(--ink);
+    font-style: italic;
+}
+
+.letter-narrative-field {
+    width: 100%;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--ink);
+    resize: none;
+    padding: calc(var(--spacing-unit) * 0.5) 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    transition: border-color 0.3s ease;
+}
+
+.letter-narrative-field:focus {
+    border-bottom-color: rgba(0, 0, 0, 0.15);
+}
+
+.letter-ps-block {
+    padding-left: calc(var(--spacing-unit) * 1);
+    border-left: 2px solid rgba(0, 0, 0, 0.06);
+}
+
+.letter-ps-label {
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink-secondary);
+    margin-bottom: calc(var(--spacing-unit) * 0.5);
+}
+
+.letter-enrichment-card {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 2px;
+    padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 1.25);
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 0.35);
+}
+
+.letter-enrichment-value {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.2;
+}
+
+.letter-planet-name {
+    font-size: 1.125rem;
+}
+
+.letter-enrichment-host {
+    font-size: 0.6875rem;
+    color: var(--ink-faint);
+}
+
+.letter-enrichment-caption {
+    font-size: 0.625rem;
+    color: var(--ink-secondary);
+    letter-spacing: 0.03em;
+}
+
+.letter-enrichment-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--spacing-unit) * 0.3) calc(var(--spacing-unit) * 0.75);
+    margin-top: calc(var(--spacing-unit) * 0.25);
+}
+
+.letter-detail-item {
+    font-size: 0.5625rem;
+    color: var(--ink-faint);
+}
+
+.letter-enrichment-picks {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 0.4);
+    overflow-x: auto;
+    padding-top: calc(var(--spacing-unit) * 0.5);
+    padding-bottom: calc(var(--spacing-unit) * 0.3);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(32, 28, 24, 0.28) rgba(32, 28, 24, 0.06);
+    -webkit-overflow-scrolling: touch;
+}
+
+.letter-enrichment-picks::-webkit-scrollbar {
+    height: 6px;
+}
+
+.letter-enrichment-picks::-webkit-scrollbar-track {
+    background: rgba(32, 28, 24, 0.06);
+    border-radius: 3px;
+}
+
+.letter-enrichment-picks::-webkit-scrollbar-thumb {
+    background: rgba(32, 28, 24, 0.28);
+    border-radius: 3px;
+}
+
+.letter-pick {
+    flex: 0 0 auto;
+    min-width: 50px;
+    min-height: 40px;
+    padding: calc(var(--spacing-unit) * 0.4) calc(var(--spacing-unit) * 0.55);
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    cursor: pointer;
+    opacity: 0.45;
+    transition: opacity 0.25s ease, border-color 0.25s ease;
+    touch-action: manipulation;
+}
+
+.letter-pick:hover {
+    opacity: 0.75;
+}
+
+.letter-pick.letter-pick-active {
+    opacity: 1;
+    border-color: var(--ink-secondary);
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.letter-pick-main {
+    font-family: var(--font-display);
+    font-size: 0.625rem;
+    color: var(--ink);
+    white-space: nowrap;
+    max-width: 68px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.letter-pick-sub {
+    font-size: 0.4375rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+}
+
+.letter-dormant-text {
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    font-style: italic;
+    line-height: 1.5;
+    margin-bottom: calc(var(--spacing-unit) * 0.75);
+}
+
+.letter-opt-in-btn {
+    padding: calc(var(--spacing-unit) * 0.5) calc(var(--spacing-unit) * 1);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border: 1px solid var(--ink-ghost);
+    color: var(--ink-secondary);
+    border-radius: 2px;
+    transition: border-color 0.3s ease, color 0.3s ease;
+    touch-action: manipulation;
+}
+
+.letter-opt-in-btn:hover {
+    border-color: var(--ink-secondary);
+    color: var(--ink);
+}
+
+.letter-message-block {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 0.5);
+    padding: calc(var(--spacing-unit) * 1);
+    border: 1px dashed rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.015);
+}
+
+.letter-message-label {
+    font-size: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-ghost);
+}
+
+.letter-message-input {
+    width: 100%;
+    min-height: 88px;
+    padding: calc(var(--spacing-unit) * 0.5);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--ink);
+    resize: vertical;
+    border-radius: 2px;
+}
+
+.letter-message-input::placeholder {
+    color: var(--ink-ghost);
+    font-style: italic;
+}
+
+.letter-message-input:focus {
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+.letter-style-btn {
+    align-self: flex-end;
+    padding: calc(var(--spacing-unit) * 0.5) calc(var(--spacing-unit) * 1);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border: 1px solid var(--ink-secondary);
+    color: var(--ink-secondary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    touch-action: manipulation;
+}
+
+.letter-style-btn:hover {
+    background: var(--ink);
+    color: var(--parchment);
+}
+
+.letter-style-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.letter-closing {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 1);
+    flex-wrap: wrap;
+}
+
+.letter-action {
+    padding: calc(var(--spacing-unit) * 0.65) calc(var(--spacing-unit) * 1.5);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border-radius: 2px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    touch-action: manipulation;
+}
+
+.letter-action-primary {
+    background: var(--ink);
+    color: var(--parchment);
+}
+
+.letter-action-secondary {
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    color: var(--ink-secondary);
+}
+
+.letter-action:hover {
+    transform: translateY(-1px);
+    opacity: 0.85;
+}
+
+.letter-action:disabled {
+    opacity: 0.35;
+    cursor: default;
+    transform: none;
+}
+
+.letter-signoff {
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    font-style: italic;
+    color: var(--ink-faint);
+    text-align: right;
+}
+
+@media (max-width: 600px) {
+    .letter-stage {
+        padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 4);
+    }
+
+    .envelope-sleeve {
+        width: 280px;
+    }
+
+    .envelope-seal {
+        width: 48px;
+        height: 48px;
+    }
+
+    .seal-glyph {
+        font-size: 0.875rem;
+    }
+
+    .letter-parchment {
+        padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 1.5);
+        gap: calc(var(--spacing-unit) * 1.5);
+    }
+
+    .letter-heading {
+        font-size: clamp(1.25rem, 5vw, 1.75rem);
+    }
+
+    .letter-figure {
+        padding: 4px 4px 16px;
+    }
+
+    .letter-figure-epic {
+        max-width: 90%;
+    }
+
+    .letter-vitals-prose {
+        font-size: 0.9375rem;
+    }
+
+    .letter-narrative-field {
+        font-size: 0.9375rem;
+    }
+
+    .letter-closing {
+        gap: calc(var(--spacing-unit) * 0.75);
+    }
+
+    .letter-action {
+        padding: calc(var(--spacing-unit) * 0.6) calc(var(--spacing-unit) * 1.25);
+        font-size: 0.625rem;
+    }
+}
+
+.letter-parchment ::selection {
+    background: rgba(163, 59, 44, 0.18);
+    color: var(--ink);
+}
+
+.letter-parchment ::-moz-selection {
+    background: rgba(163, 59, 44, 0.18);
+    color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .envelope-scene,
+    .letter-parchment,
+    .letter-verse,
+    .letter-stage.seal-cracking .envelope-seal,
+    .letter-stage.seal-cracking .envelope-flap {
+        transition-duration: 0.01ms;
+    }
+
+    .envelope-seal {
+        animation: none;
+    }
+
+    .letter-figure {
+        transform: rotate(0deg);
+    }
+
+    .letter-figure-epic {
+        transform: rotate(0deg);
+    }
+}
+
+.letter-parchment textarea {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(32, 28, 24, 0.28) rgba(32, 28, 24, 0.06);
+}
+
+.letter-parchment textarea::-webkit-scrollbar {
+    width: 6px;
+}
+
+.letter-parchment textarea::-webkit-scrollbar-track {
+    background: rgba(32, 28, 24, 0.06);
+    border-radius: 3px;
+}
+
+.letter-parchment textarea::-webkit-scrollbar-thumb {
+    background: rgba(32, 28, 24, 0.28);
+    border-radius: 3px;
+}
+
+.letter-message-block .field-tally {
+    color: rgba(32, 28, 24, 0.4);
+}
+
+.letter-message-block .field-tally.tally-warn {
+    color: rgb(150, 95, 20);
+}
+
+.letter-message-block .field-tally.tally-full {
+    color: var(--seal-crimson);
+}
+
+.letter-address-rendered {
+    font-family: var(--font-display);
+    color: var(--ink);
+    border-bottom: 1px solid rgba(32, 28, 24, 0.18);
+    padding: 0 calc(var(--spacing-unit) * 0.35);
+}
+
+.letter-narrative-readonly {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--ink);
+    width: 100%;
+}
+
+.letter-parchment .personal-message-panel {
+    padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 1.25);
+    border-top: 1px solid rgba(32, 28, 24, 0.12);
+    border-bottom: 1px solid rgba(32, 28, 24, 0.12);
+}
+
+.letter-parchment .personal-message-mark {
+    color: var(--seal-crimson);
+    opacity: 0.5;
+}
+
+.letter-parchment .personal-message-body {
+    font-family: var(--font-display);
+    font-size: 1.1875rem;
+    line-height: 1.75;
+    text-align: center;
+    color: var(--ink);
+}
+
+a.letter-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.share-link-readout {
+    display: block;
+    margin-top: calc(var(--spacing-unit) * 0.75);
+    font-family: var(--font-mono, monospace);
+    font-size: 0.72rem;
+    color: var(--color-ink-soft, #5a5348);
+    word-break: break-all;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* Pinning the document while the envelope is sealed, so the only thing a recipient can do is the one thing they are meant to do */
+body.letter-sealed {
+    overflow: hidden;
+}

@@ -1,0 +1,97 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Locking the box model and text sizing at the root so every later measurement in the project means the same thing */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    font-size: 16px;
+}
+
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    text-rendering: optimizeSpeed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    background-color: #000000;
+    color: #ffffff;
+}
+
+::selection {
+    background: rgba(244, 244, 245, 0.15);
+    color: #f4f4f5;
+}
+
+::-moz-selection {
+    background: rgba(244, 244, 245, 0.15);
+    color: #f4f4f5;
+}
+
+img,
+picture,
+svg,
+video,
+/* Removing the inline baseline gap that would otherwise leave a hairline of body colour beneath a full-bleed canvas */
+canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+    font: inherit;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+}
+
+input:not([type="date"]),
+button,
+textarea,
+select {
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+button {
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+/* Restoring a visible ring for keyboard users only, since the reset above strips the native outline from every control in the project */
+:focus-visible {
+    outline: 2px solid rgba(244, 244, 245, 0.85);
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Honouring a reduced-motion preference by disabling animation wholesale, since every transition here is decorative rather than informational */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

@@ -1,0 +1,13 @@
+name = "skywritten"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "public"
+
+[vars]
+AI_PROVIDER = "groq"
+AI_MODEL = "openai/gpt-oss-120b"
+AI_FALLBACK_MODEL = "openai/gpt-oss-20b"
+
+[[kv_namespaces]]
+binding = "GIFT_STORE"
+id = "ebd82254e3c84e438815967039c86545"
+preview_id = "PASTE_PREVIEW_NAMESPACE_ID_HERE"

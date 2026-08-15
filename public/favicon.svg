@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Skywritten">
+    <defs>
+        <radialGradient id="nightField" cx="50%" cy="42%" r="62%">
+            <stop offset="0%" stop-color="#141420" />
+            <stop offset="100%" stop-color="#030304" />
+        </radialGradient>
+    </defs>
+
+    <rect width="64" height="64" rx="13" fill="url(#nightField)" />
+
+    <circle cx="12.5" cy="13" r="1.15" fill="#f4f4f5" opacity="0.5" />
+    <circle cx="52" cy="16" r="0.85" fill="#f4f4f5" opacity="0.36" />
+    <circle cx="54.5" cy="45" r="1.05" fill="#f4f4f5" opacity="0.42" />
+    <circle cx="10" cy="47" r="0.8" fill="#f4f4f5" opacity="0.32" />
+    <circle cx="31" cy="56.5" r="0.7" fill="#f4f4f5" opacity="0.26" />
+    <circle cx="44" cy="9" r="0.65" fill="#f4f4f5" opacity="0.24" />
+
+    <ellipse cx="32" cy="33" rx="25" ry="10.5" fill="none" stroke="#f4f4f5"
+        stroke-opacity="0.22" stroke-width="1.4" transform="rotate(-27 32 33)" />
+
+    <path d="M40.3 20.6c-2.1-2.3-5.1-3.6-8.6-3.6-6.3 0-10.4 3.4-10.4 8.3 0 4.2 2.7 6.6 8.6 8.2l2.9 0.8c3.9 1.1 5.3 2.2 5.3 4.3 0 2.6-2.4 4.3-6.1 4.3-3.4 0-6.1-1.4-8.2-4.1l-3.6 3.6c2.5 3.2 6.5 5 11.5 5 6.8 0 11.2-3.5 11.2-8.9 0-4.4-2.7-6.9-8.9-8.6l-2.9-0.8c-3.6-1-5-2-5-3.9 0-2.3 2.1-3.8 5.4-3.8 2.9 0 5.2 1.1 6.9 3.3z"
+        fill="#f4f4f5" />
+
+    <path d="M49.5 12.6 L50.7 16.4 L54.5 17.6 L50.7 18.8 L49.5 22.6 L48.3 18.8 L44.5 17.6 L48.3 16.4 Z"
+        fill="#f4f4f5" opacity="0.92" />
+</svg>
